@@ -21,40 +21,40 @@ type
   { TSubtitleFile }
 
   PStringItemList = ^TStringItemList;
-  TStringItemList = array[0..MaxListSize] of {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF};
+  TStringItemList = array[0..MaxListSize] of String;
 
   TSubtitleFile = class
   private
     FList: PStringItemList;
     FCount: Integer;
     FCapacity: Integer;
-    function Get(Index: Integer): {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF};
-    procedure Put(Index: Integer; const S: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF});
+    function Get(Index: Integer): String;
+    procedure Put(Index: Integer; const S: String);
     procedure SetCapacity(NewCapacity: Integer);
     procedure Grow;
-    function GetTextStr: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF};
-    procedure SetTextStr(const Value: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF});
+    function GetTextStr: String;
+    procedure SetTextStr(const Value: String);
   public
     constructor Create(FileName: String = ''; Trim: Boolean = True);
     destructor Destroy; override;
     procedure LoadFromFile(FileName: String; Trim: Boolean = True);
     // procedure SaveToFile(FileName: String);
     procedure SaveToFile(FileName: String; LineBreaks: TTextLineBreakStyle = tlbsCRLF);
-    function Add(const S: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF}; Trim: Boolean = True): Integer;
-    procedure Insert(Index: Integer; const S: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF}; Trim: Boolean = True);
+    function Add(const S: String; Trim: Boolean = True): Integer;
+    procedure Insert(Index: Integer; const S: String; Trim: Boolean = True);
     procedure Move(CurIndex, NewIndex: Integer);
     procedure Delete(Index: Integer);
     procedure Clear;
     property Capacity: Integer read FCapacity write SetCapacity;
     property Count: Integer read FCount;
-    property Strings[Index: Integer]: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF} read Get write Put; default;
-    property Text: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF} read GetTextStr write SetTextStr;
+    property Strings[Index: Integer]: String read Get write Put; default;
+    property Text: String read GetTextStr write SetTextStr;
   end;
 
   { TSubtitles }
 
   TSubtitleItem = record
-    Text: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF};
+    Text: String;
     InitialTime, FinalTime: Integer;
   end;
 
@@ -70,8 +70,8 @@ type
     procedure SetFormat(Format: ShortInt);
     function GetItem(Index: Integer): TSubtitleItem;
     procedure PutItem(Index: Integer; const Item: TSubtitleItem);
-    function GetText(Index: Integer): {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF};
-    procedure PutText(Index: Integer; const S: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF});
+    function GetText(Index: Integer): String;
+    procedure PutText(Index: Integer; const S: String);
     function GetInitialTime(Index: Integer): Integer;
     procedure PutInitialTime(Index: Integer; const Time: Integer);
     function GetFinalTime(Index: Integer): Integer;
@@ -81,9 +81,9 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    function Add(const StartTime, EndTime: Integer; const Caption: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF}; CheckSub: Boolean = True): Integer; overload;
+    function Add(const StartTime, EndTime: Integer; const Caption: String; CheckSub: Boolean = True): Integer; overload;
     function Add(const Item: TSubtitleItem; CheckSub: Boolean = True): Integer; overload;
-    procedure Insert(Index: Integer; const StartTime, EndTime: Integer; const Caption: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF}; CheckSub: Boolean = True); overload;
+    procedure Insert(Index: Integer; const StartTime, EndTime: Integer; const Caption: String; CheckSub: Boolean = True); overload;
     procedure Insert(Index: Integer; const Item: TSubtitleItem; CheckSub: Boolean = True); overload;
     procedure Move(CurIndex, NewIndex: Integer);
     procedure Delete(Index: Integer);
@@ -92,7 +92,7 @@ type
     property Capacity: Integer read FCapacity write SetCapacity;
     property Format: ShortInt read FFormat write SetFormat;
     property Items[Index: Integer]: TSubtitleItem read GetItem write PutItem; default;
-    property Text[Index: Integer]: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF} read GetText write PutText;
+    property Text[Index: Integer]: String read GetText write PutText;
     property InitialTime[Index: Integer]: Integer read GetInitialTime write PutInitialTime;
     property FinalTime[Index: Integer]: Integer read GetFinalTime write PutFinalTime;
   end;
@@ -134,7 +134,7 @@ end;
 procedure TSubtitleFile.LoadFromFile(FileName: String; Trim: Boolean = True);
 var
   f : TextFile;
-  s : {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF};
+  s : String;
 begin
   Clear;
 
@@ -184,7 +184,7 @@ end;
 
 // -----------------------------------------------------------------------------
 
-function TSubtitleFile.Get(Index: Integer): {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF};
+function TSubtitleFile.Get(Index: Integer): String;
 begin
   If (Index >= 0) Or (Index < FCount) Then
     Result := FList^[Index];
@@ -192,7 +192,7 @@ end;
 
 // -----------------------------------------------------------------------------
 
-procedure TSubtitleFile.Put(Index: Integer; const S: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF});
+procedure TSubtitleFile.Put(Index: Integer; const S: String);
 begin
   If (Index >= 0) Or (Index < FCount) Then
     FList^[Index] := S;
@@ -200,7 +200,7 @@ end;
 
 // -----------------------------------------------------------------------------
 
-function TSubtitleFile.Add(const S: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF}; Trim: Boolean = True): Integer;
+function TSubtitleFile.Add(const S: String; Trim: Boolean = True): Integer;
 begin
   Result := FCount;
   Insert(Result, S, Trim);
@@ -208,9 +208,9 @@ end;
 
 // -----------------------------------------------------------------------------
 
-procedure TSubtitleFile.Insert(Index: Integer; const S: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF}; Trim: Boolean = True);
+procedure TSubtitleFile.Insert(Index: Integer; const S: String; Trim: Boolean = True);
 var
-  FLine: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF};
+  FLine: String;
 begin
   If Trim = True Then
   Begin
@@ -236,7 +236,7 @@ end;
 
 procedure TSubtitleFile.Move(CurIndex, NewIndex: Integer);
 var
-  TempString: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF};
+  TempString: String;
 begin
   If (CurIndex >= 0) And (CurIndex < FCount) And (CurIndex <> NewIndex) Then
   Begin
@@ -297,11 +297,11 @@ end;
 
 // -----------------------------------------------------------------------------
 
-function TSubtitleFile.GetTextStr: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF};
+function TSubtitleFile.GetTextStr: String;
 var
   I, L, Size : Integer;
-  P          : {$IFDEF UTF8}PWideChar{$ELSE}PChar{$ENDIF};
-  S, LB      : {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF};
+  P          : PChar;
+  S, LB      : String;
 begin
   Size := 0;
   LB   := #13#10;
@@ -335,10 +335,10 @@ end;
 
 // -----------------------------------------------------------------------------
 
-procedure TSubtitleFile.SetTextStr(const Value: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF});
+procedure TSubtitleFile.SetTextStr(const Value: String);
 var
-  P, Start : {$IFDEF UTF8}PWideChar{$ELSE}PChar{$ENDIF};
-  S        : {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF};
+  P, Start : PChar;
+  S        : String;
 begin
   Clear;
   P := Pointer(Value);
@@ -421,7 +421,7 @@ end;
 
 // -----------------------------------------------------------------------------
 
-function TSubtitles.GetText(Index: Integer): {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF};
+function TSubtitles.GetText(Index: Integer): String;
 begin
   If (Index >= 0) Or (Index < FCount) Then
     Result := FList^[Index].Text;
@@ -429,7 +429,7 @@ end;
 
 // -----------------------------------------------------------------------------
 
-procedure TSubtitles.PutText(Index: Integer; const S: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF});
+procedure TSubtitles.PutText(Index: Integer; const S: String);
 begin
   If (Index >= 0) Or (Index < FCount) Then
     FList^[Index].Text := S;
@@ -473,7 +473,7 @@ end;
 
 // -----------------------------------------------------------------------------
 
-function TSubtitles.Add(const StartTime, EndTime: Integer; const Caption: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF}; CheckSub: Boolean = True): Integer;
+function TSubtitles.Add(const StartTime, EndTime: Integer; const Caption: String; CheckSub: Boolean = True): Integer;
 begin
   If CheckSub = True Then
 //    If (Trim(Caption) = '') or (StartTime > EndTime) Then   // removed by BDZL 2007.10.02
@@ -502,7 +502,7 @@ end;
 
 // -----------------------------------------------------------------------------
 
-procedure TSubtitles.Insert(Index: Integer; const StartTime, EndTime: Integer; const Caption: {$IFDEF UTF8}WideString{$ELSE}String{$ENDIF}; CheckSub: Boolean = True);
+procedure TSubtitles.Insert(Index: Integer; const StartTime, EndTime: Integer; const Caption: String; CheckSub: Boolean = True);
 begin
   If CheckSub = True Then
   Begin
