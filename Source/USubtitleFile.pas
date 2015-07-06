@@ -121,7 +121,7 @@ end;
 destructor TSubtitleFile.Destroy;
 begin
   If FCount <> 0 Then
-    Finalize(FList^[0], FCount);
+    Finalize(FList[0], FCount);
 
   FCount := 0;
   SetCapacity(0);
@@ -187,7 +187,7 @@ end;
 function TSubtitleFile.Get(Index: Integer): String;
 begin
   If (Index >= 0) Or (Index < FCount) Then
-    Result := FList^[Index];
+    Result := FList[Index];
 end;
 
 // -----------------------------------------------------------------------------
@@ -195,7 +195,7 @@ end;
 procedure TSubtitleFile.Put(Index: Integer; const S: String);
 begin
   If (Index >= 0) Or (Index < FCount) Then
-    FList^[Index] := S;
+    FList[Index] := S;
 end;
 
 // -----------------------------------------------------------------------------
@@ -224,10 +224,10 @@ begin
     Grow;
 
   If Index < FCount Then
-    System.Move(FList^[Index], FList^[Index + 1], (FCount - Index) * SizeOf(String));
+    System.Move(FList[Index], FList[Index + 1], (FCount - Index) * SizeOf(String));
 
-  Pointer(FList^[Index]) := NIL;
-  FList^[Index]          := FLine;
+  Pointer(FList[Index]) := NIL;
+  FList[Index]          := FLine;
 
   Inc(FCount);
 end;
@@ -252,11 +252,11 @@ procedure TSubtitleFile.Delete(Index: Integer);
 begin
   If (Index < 0) Or (Index >= FCount) Then Exit;
 
-  Finalize(FList^[Index]);
+  Finalize(FList[Index]);
   Dec(FCount);
 
   If Index < FCount Then
-    System.Move(FList^[Index + 1], FList^[Index], (FCount - Index) * SizeOf(String));
+    System.Move(FList[Index + 1], FList[Index], (FCount - Index) * SizeOf(String));
 end;
 
 // -----------------------------------------------------------------------------
@@ -265,7 +265,7 @@ procedure TSubtitleFile.Clear;
 begin
   If FCount <> 0 Then
   Begin
-    Finalize(FList^[0], FCount);
+    Finalize(FList[0], FCount);
     FCount := 0;
     SetCapacity(0);
   End;
@@ -468,7 +468,7 @@ end;
 procedure TSubtitles.PutFinalTime(Index: Integer; const Time: Integer);
 begin
   If (Index >= 0) Or (Index < FCount) Then
-    FList^[Index].FinalTime := Time;
+    FList[Index].FinalTime := Time;
 end;
 
 // -----------------------------------------------------------------------------
