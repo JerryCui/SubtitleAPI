@@ -8,7 +8,7 @@ function SubtitlesToFile_ULEADDVDWORKSHOP2(Subtitles: TSubtitles; const FileName
 var
   tmpSubFile         : TSubtitleFile;
   i, count           : Integer;
-  time1, time2       : string;
+  time1, time2       : shortstring;
 begin
   Result := True;
   tmpSubFile := TSubtitleFile.Create;
@@ -58,7 +58,16 @@ begin
     tmpSubFile.Add('#Subtitle text attribute end', False);
 
     try
-      tmpSubFile.SaveToFile(FileName);
+       if UTF8File
+	  then begin           
+           for I := 0 to TmpSubFile.Count - 1 do Tstr.add(TmpSubFile[I]);
+		   try
+             Tstr.SaveToFile(FileName, TEncoding.UTF8);
+			except
+			 Result := False;
+            end;			           
+         end
+      else tmpSubFile.SaveToFile(FileName);
     except
       Result := False;
     end;

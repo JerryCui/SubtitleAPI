@@ -13,7 +13,7 @@ function SubtitlesToFile_MICRODVD(Subtitles: TSubtitles; const FileName: String;
 		  function TextHasTag(Text, openTag, closeTag: String): Boolean;
 		  begin
 		    if (StringCount(openTag, Text, False) = 1) and (StringCount(closeTag, Text, False) <= 1)
-		      and (StrIPos(openTag, Text) = 1) and (StrIPos(closeTag, Text) = Length(Text)-Length(closeTag)+1) then
+		      and (SmartPos(openTag, Text, False) = 1) and (SmartPos(closeTag, Text, False) = Length(Text)-Length(closeTag)+1) then
 		        Result := True else
 		        Result := False;
 		  end;
@@ -45,14 +45,14 @@ function SubtitlesToFile_MICRODVD(Subtitles: TSubtitles; const FileName: String;
 		  Color := TextHasTag(RemoveSWTags(Text, True, True, True, False), '<c:#', '</c>');
 		  if Color then
 		  begin
-		    TheColor := Copy(Text, StrIPos('<c:#', Text) + 4, 6);
+		    TheColor := Copy(Text, SmartPos('<c:#', Text, False) + 4, 6);
 		    Text := RemoveSWTags(Text, False, False, False, True);
 		  end else
 		  begin
 		    Color := TextHasTag(RemoveSWTags(Text, True, True, True, False), '<font color=#', '</font>');
 		    if Color then
 		    begin
-		      TheColor := Copy(Text, StrIPos('<font color=#', Text) + 13, 6);
+		      TheColor := Copy(Text, SmartPos('<font color=#', Text, False) + 13, 6);
 		      Text := RemoveSWTags(Text, False, False, False, True);
 		    end;
 		  end;
@@ -79,9 +79,7 @@ function SubtitlesToFile_MICRODVD(Subtitles: TSubtitles; const FileName: String;
 		
 		  if Color then
 		  begin
-		    if CharIsHexDigit(TheColor[1]) and CharIsHexDigit(TheColor[2]) and
-           CharIsHexDigit(TheColor[3]) and CharIsHexDigit(TheColor[4]) and
-           CharIsHexDigit(TheColor[5]) and CharIsHexDigit(TheColor[6]) then
+		    if (TheColor[1] in HexChars) and (TheColor[2] in HexChars) and (TheColor[3] in HexChars) and (TheColor[4] in HexChars) and (TheColor[5] in HexChars) and (TheColor[6] in HexChars) then
 		    begin
 		      CTag := CTag + TheColor[5] + TheColor[6] + TheColor[3] + TheColor[4] + TheColor[1] + TheColor[2] + '}';
 		      Text := CTag + Text;
@@ -147,10 +145,10 @@ begin
   tmpSubFile := TSubtitleFile.Create;
   try
     // DivXG400 FPS Info tag
-    DecimalSep       := FormatSettings.DecimalSeparator;
-    FormatSettings.DecimalSeparator := '.';
+    DecimalSep       := System.SysUtils.FormatSettings.DecimalSeparator;
+    System.SysUtils.FormatSettings.DecimalSeparator := '.';
     tmpSubFile.Add(Format('{1}{1}%.3f', [FPS]), False);
-    FormatSettings.DecimalSeparator := DecimalSep;
+    System.SysUtils.FormatSettings.DecimalSeparator := DecimalSep;
 
     for i := From to UpTo do
     begin
@@ -159,7 +157,16 @@ begin
     end;
 
     try
-      tmpSubFile.SaveToFile(FileName);
+       if UTF8File
+	  then begin           
+           for I := 0 to TmpSubFile.Count - 1 do Tstr.add(TmpSubFile[I]);
+		   try
+             Tstr.SaveToFile(FileName, TEncoding.UTF8);
+			except
+			 Result := False;
+            end;			           
+         end
+      else tmpSubFile.SaveToFile(FileName);
     except
       Result := False;
     end;

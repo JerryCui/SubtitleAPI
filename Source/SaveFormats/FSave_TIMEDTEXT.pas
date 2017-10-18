@@ -20,7 +20,7 @@ begin
     Add(' <body region="subtitleArea">', False); //region="subtitleArea" added by adenry 2013.04.13
     Add('   <div>', False); //added by adenry 2013.04.13
 
-    FormatSettings.DecimalSeparator := '.'; //added by adenry 2013.04.13
+    System.SysUtils.FormatSettings.DecimalSeparator := '.'; //added by adenry 2013.04.13
 
     for i := From to UpTo do
     begin
@@ -46,7 +46,16 @@ begin
     Add('</tt>', False);
 
     try
-      tmpSubFile.SaveToFile(FileName);
+       if UTF8File
+	  then begin           
+           for I := 0 to TmpSubFile.Count - 1 do Tstr.add(TmpSubFile[I]);
+		   try
+             Tstr.SaveToFile(FileName, TEncoding.UTF8);
+			except
+			 Result := False;
+            end;			           
+         end
+      else tmpSubFile.SaveToFile(FileName);
     except
       Result := False;
     end;

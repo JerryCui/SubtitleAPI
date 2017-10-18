@@ -93,7 +93,16 @@ begin
     tmpSubFile.Add('\par }}', False);
 
     try
-      tmpSubFile.SaveToFile(FileName);
+       if UTF8File
+	  then begin           
+           for I := 0 to TmpSubFile.Count - 1 do Tstr.add(TmpSubFile[I]);
+		   try
+             Tstr.SaveToFile(FileName, TEncoding.UTF8);
+			except
+			 Result := False;
+            end;			           
+         end
+      else tmpSubFile.SaveToFile(FileName);
     except
       Result := False;
     end;
