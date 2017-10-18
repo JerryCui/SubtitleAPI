@@ -13,8 +13,7 @@ interface
 uses
   Windows, Vcl.Dialogs, Vcl.Controls,
   Classes, //added by adenry 2013.04.11 - for TStringList
-  USubtitlesRead, USubtitleFile, USubtitlesFunctions, SysUtils, StrUtils,
-  jclStrings;
+  USubtitlesRead, USubtitleFile, USubtitlesFunctions, FastStrings, SysUtils;
 
 //function RemoveSWTags                            (Text: String; Bold, Italic, Underline: Boolean; Color: Boolean = True): String; //moved to USubtitlesFunctions by adenry 2013.04.11
 function SubtitlesToFile                         (Subtitles: TSubtitles; const FileName: String; const FPS: Single; const SubtitleFormat: TSubtitleFormats; From: Integer = -1; UpTo: Integer = -1): Boolean;
@@ -231,6 +230,7 @@ var
   SSAAttributes            : TSSAAttributes;
   TMPlayerAttributes       : TTMPlayerAttributes;
   XASAttributes            : TXASAttributes; //added by adenry 2013.08.09
+  var Tstr                 : TStrings; // <------- Kameleon
 
 // -----------------------------------------------------------------------------
 
@@ -242,6 +242,8 @@ function SubtitlesToFile(Subtitles: TSubtitles; const FileName: String; const FP
 begin
   Result := False;
   if not Assigned(Subtitles) then exit;
+
+  Tstr := TStringList.Create; // Kameleon
 
   if From = -1 then From := 0;
   if UpTo = -1 then UpTo := Subtitles.Count-1;
@@ -321,6 +323,8 @@ begin
       sfZeroG                   : Result := SubtitlesToFile_ZEROG(Subtitles, FileName, From, UpTo);
     end;
   end;
+
+  Tstr.Free; // Kameleon
 end;
 
 // -----------------------------------------------------------------------------
