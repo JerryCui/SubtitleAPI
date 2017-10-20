@@ -1,13 +1,13 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
-        <ProjectGuid>{6D8F9DC7-18DB-4A79-B17F-083CAEC54DF0}</ProjectGuid>
+        <ProjectGuid>{F04BBDF0-95AB-4DB7-834F-ACBBA6DB7020}</ProjectGuid>
         <MainSource>SubtitleAPI.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
         <TargetedPlatforms>1</TargetedPlatforms>
         <AppType>Library</AppType>
         <FrameworkType>None</FrameworkType>
-        <ProjectVersion>17.2</ProjectVersion>
+        <ProjectVersion>18.2</ProjectVersion>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
@@ -15,11 +15,6 @@
     </PropertyGroup>
     <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Base)'=='true') or '$(Base_Win32)'!=''">
         <Base_Win32>true</Base_Win32>
-        <CfgParent>Base</CfgParent>
-        <Base>true</Base>
-    </PropertyGroup>
-    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Base)'=='true') or '$(Base_Win64)'!=''">
-        <Base_Win64>true</Base_Win64>
         <CfgParent>Base</CfgParent>
         <Base>true</Base>
     </PropertyGroup>
@@ -33,51 +28,57 @@
         <CfgParent>Base</CfgParent>
         <Base>true</Base>
     </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win32)'!=''">
+        <Cfg_2_Win32>true</Cfg_2_Win32>
+        <CfgParent>Cfg_2</CfgParent>
+        <Cfg_2>true</Cfg_2>
+        <Base>true</Base>
+    </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <VerInfo_Build>117</VerInfo_Build>
-        <DCC_K>false</DCC_K>
-        <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Winapi;$(DCC_Namespace)</DCC_Namespace>
-        <DCC_N>true</DCC_N>
-        <DCC_E>false</DCC_E>
-        <DCC_IntegerOverflowCheck>true</DCC_IntegerOverflowCheck>
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <DCC_DcuOutput>DCU</DCC_DcuOutput>
-        <DCC_ExeOutput>..\Bin\SubtitleAPI</DCC_ExeOutput>
-        <DCC_ImageBase>00400000</DCC_ImageBase>
-        <DCC_S>false</DCC_S>
-        <VerInfo_MinorVer>14</VerInfo_MinorVer>
-        <VerInfo_Keys>CompanyName=URUWorks, Bedazzle, Andrey Spiridonov;FileDescription=;FileVersion=1.14.0.117;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=Subtitle API;ProductVersion=1.0.14.0;Comments=</VerInfo_Keys>
-        <DCC_UsePackage>vcl;rtl;dsnapcon;dsnap;dbrtl;vcldb;vclx;adortl;bdertl;vcldbx;ibxpress;teeui;teedb;tee;dss;visualclx;visualdbclx;vclactnband;USViPlay3;$(DCC_UsePackage)</DCC_UsePackage>
-        <DCC_RangeChecking>true</DCC_RangeChecking>
-        <SanitizedProjectName>SubtitleAPI</SanitizedProjectName>
-        <VerInfo_DLL>true</VerInfo_DLL>
-        <DCC_F>false</DCC_F>
         <VerInfo_Locale>1033</VerInfo_Locale>
+        <DCC_IntegerOverflowCheck>true</DCC_IntegerOverflowCheck>
+        <SanitizedProjectName>SubtitleAPI</SanitizedProjectName>
+        <DCC_ExeOutput>..\Bin\SubtitleAPI</DCC_ExeOutput>
         <DCC_DebugInformation>1</DCC_DebugInformation>
+        <VerInfo_Build>117</VerInfo_Build>
+        <VerInfo_MinorVer>14</VerInfo_MinorVer>
+        <DCC_N>true</DCC_N>
+        <DCC_F>false</DCC_F>
+        <DCC_RangeChecking>true</DCC_RangeChecking>
+        <DCC_K>false</DCC_K>
+        <DCC_S>false</DCC_S>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <DCC_E>false</DCC_E>
         <DCC_UnitSearchPath>..\Lib;$(DELPHI)\Lib\Debug;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-        <DCC_Optimize>false</DCC_Optimize>
         <GenDll>true</GenDll>
         <VerInfo_AutoGenVersion>true</VerInfo_AutoGenVersion>
+        <VerInfo_DLL>true</VerInfo_DLL>
+        <DCC_ImageBase>00400000</DCC_ImageBase>
+        <DCC_UsePackage>vcl;rtl;dsnapcon;dsnap;dbrtl;vcldb;vclx;adortl;bdertl;vcldbx;ibxpress;teeui;teedb;tee;dss;visualclx;visualdbclx;vclactnband;USViPlay3;$(DCC_UsePackage)</DCC_UsePackage>
+        <DCC_DcuOutput>DCU</DCC_DcuOutput>
+        <DCC_Optimize>false</DCC_Optimize>
+        <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Winapi;$(DCC_Namespace)</DCC_Namespace>
+        <VerInfo_Keys>CompanyName=URUWorks, Bedazzle, Andrey Spiridonov;FileDescription=;FileVersion=1.14.0.117;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=Subtitle API;ProductVersion=1.0.14.0;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <Icon_MainIcon>SubtitleAPI_Icon.ico</Icon_MainIcon>
         <DCC_Namespace>System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
-        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Base_Win64)'!=''">
+        <VerInfo_Keys>CompanyName=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
         <Icon_MainIcon>SubtitleAPI_Icon.ico</Icon_MainIcon>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
-        <DCC_DebugInformation>0</DCC_DebugInformation>
-        <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
         <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+        <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
         <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+        <DCC_DebugInformation>0</DCC_DebugInformation>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+        <Debugger_HostApplication>C:\Delphi 10.1 Projects\Subtitle WorkShop\SubtitleWorkshop_6.0b_131121_source\SubtitleWorkshop 6.0b\Bin\SubtitleWorkshop.exe</Debugger_HostApplication>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
@@ -88,6 +89,8 @@
         <DCCReference Include="Source\USubtitlesRead.pas"/>
         <DCCReference Include="Source\USubtitlesSave.pas"/>
         <DCCReference Include="Source\USubtitlesFunctions.pas"/>
+        <DCCReference Include="..\Lib\FastStrings.pas"/>
+        <DCCReference Include="..\..\3rd party components\xmlparser-1.0.20\LibXmlParser.pas"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -110,8 +113,8 @@
                 </Source>
             </Delphi.Personality>
             <Platforms>
+                <Platform value="Linux64">False</Platform>
                 <Platform value="Win32">True</Platform>
-                <Platform value="Win64">False</Platform>
             </Platforms>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>

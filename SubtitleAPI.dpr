@@ -89,12 +89,12 @@ library SubtitleAPI;
 
 { $DEFINE UTF8}
 
-{$IFDEF VER150}
+//{$IFDEF VER150}
   {$WARN SYMBOL_DEPRECATED OFF}
   {$WARN UNSAFE_CODE OFF}
   {$WARN UNSAFE_TYPE OFF}
   {$WARN UNSAFE_CAST OFF}
-{$ENDIF}
+//{$ENDIF}
 
 uses
   SysUtils,
@@ -103,7 +103,9 @@ uses
   UCheckFormat in 'Source\UCheckFormat.pas',
   USubtitlesRead in 'Source\USubtitlesRead.pas',
   USubtitlesSave in 'Source\USubtitlesSave.pas',
-  USubtitlesFunctions in 'Source\USubtitlesFunctions.pas';
+  USubtitlesFunctions in 'Source\USubtitlesFunctions.pas',
+  FastStrings in '..\Lib\FastStrings.pas',
+  LibXmlParser in '..\..\3rd party components\xmlparser-1.0.20\LibXmlParser.pas';
 
 var
   Subtitles: TSubtitles = NIL;
@@ -848,6 +850,18 @@ begin
 end;
 //added by adenry: end 2013.08.09
 
+// added by Kameleon
+procedure Set_UTF8_File(value: LongBool);   stdcall;
+begin
+  UTF8File := value;
+end;
+
+function Get_UTF8_File: longbool;   stdcall;
+begin
+  Result := UTF8File;
+end;
+//end added by Kameleon
+
 // -----------------------------------------------------------------------------
 
 exports
@@ -919,8 +933,9 @@ exports
   SetOutputSettingsSubViewer2,
   SetOutputSettingsSubStationAlpha,
   SetOutputSettingsTMPlayer,
-  SetOutputSettingsXAS; //added by adenry 2013.08.09
-
+  SetOutputSettingsXAS, //added by adenry 2013.08.09
+  Set_UTF8_File, // added by Kameleon
+  Get_UTF8_File;
 // -----------------------------------------------------------------------------
 
 begin
