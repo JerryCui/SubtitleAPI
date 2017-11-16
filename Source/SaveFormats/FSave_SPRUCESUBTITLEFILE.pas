@@ -146,11 +146,11 @@ begin
 
       //added by adenry: begin 2013.04.12
       //add control command line to set a color (for the entire sub only):
-      if StrIPos('<c:#', tmpStr) > 0 then
+      if SmartPos('<c:#', tmpStr, False) > 0 then
       begin
-        if Color <> Copy(tmpStr, StrIPos('<c:#', tmpStr)+4, 6) then
+        if Color <> Copy(tmpStr, SmartPos('<c:#', tmpStr, False)+4, 6) then
         begin
-          Color := Copy(tmpStr, StrIPos('<c:#', tmpStr)+4, 6);
+          Color := Copy(tmpStr, SmartPos('<c:#', tmpStr, False)+4, 6);
           //Default palette colors:
           //TODO: Approximate color instead of this...
           if Color = '000000' then tmpSubFile.Add('$ColorIndex3 = ' + IntToStr(0), False)  else //Black      : 000, 000, 000
@@ -203,7 +203,16 @@ begin
     end;}
 
     try
-      tmpSubFile.SaveToFile(FileName);
+       if UTF8File
+	  then begin           
+           for I := 0 to TmpSubFile.Count - 1 do Tstr.add(TmpSubFile[I]);
+		   try
+             Tstr.SaveToFile(FileName, TEncoding.UTF8);
+			except
+			 Result := False;
+            end;			           
+         end
+      else tmpSubFile.SaveToFile(FileName);
     except
       Result := False;
     end;

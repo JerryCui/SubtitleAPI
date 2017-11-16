@@ -14,7 +14,8 @@ function SubtitlesToFile_SUBRIP(Subtitles: TSubtitles; const FileName: String; F
     {$ENDIF}
   //DELETE ALL TAGS:
       if WorkWithTags = False then
-        Text := RemoveSWTags(Text, True, True, True, True) else
+        //Text := RemoveSWTags(Text, True, True, True, True) // <--------- Dany
+        else
       {$IFNDEF VIPLAY}
   //SINGLE TAGS MODE:
       if SingleTagsMode then //added by adenry 2013.04.11
@@ -31,7 +32,7 @@ function SubtitlesToFile_SUBRIP(Subtitles: TSubtitles; const FileName: String; F
         //removed by adenry: end
         
         //added by adenry: begin 2013.04.11
-        Text := SetTagsForSingleTagsMode(Text, True);
+        //Text := SetTagsForSingleTagsMode(Text, True); // <------ Dany
         Text := ReplaceString(Text, '<c:#', '<font color=');
         Text := ReplaceString(Text, '</c>', '</font>');
         //added by adenry: end
@@ -42,11 +43,11 @@ function SubtitlesToFile_SUBRIP(Subtitles: TSubtitles; const FileName: String; F
   //MULTI TAGS MODE:
       if MultiTagsMode then
       begin
-        Text := CloseUnclosedTags(Text, '<b>', '</b>');
-        Text := CloseUnclosedTags(Text, '<i>', '</i>');
-        Text := CloseUnclosedTags(Text, '<u>', '</u>');
-        Text := CloseUnclosedTags(Text, '<c:#', '</c>');
-        Text := CloseUnclosedTags(Text, '<font', '</font>');
+        //Text := CloseUnclosedTags(Text, '<b>', '</b>'); // <------ Dany
+        //Text := CloseUnclosedTags(Text, '<i>', '</i>');
+        //Text := CloseUnclosedTags(Text, '<u>', '</u>');
+        //Text := CloseUnclosedTags(Text, '<c:#', '</c>');
+        //Text := CloseUnclosedTags(Text, '<font', '</font>');
         Text := ReplaceString(Text, '<c:#', '<font color=#');
         Text := ReplaceString(Text, '</c>', '</font>');
       end
@@ -61,7 +62,7 @@ function SubtitlesToFile_SUBRIP(Subtitles: TSubtitles; const FileName: String; F
 
 var
   tmpSubFile : TSubtitleFile;
-  i, Count   : Integer;
+  i, Count   : Integer; 
 begin
   Count  := 1;
   Result := True;
@@ -81,7 +82,20 @@ begin
     end;
 
     try
-      tmpSubFile.SaveToFile(FileName);
+	  if UTF8File
+	  then begin           
+           for I := 0 to TmpSubFile.Count - 1 do Tstr.add(TmpSubFile[I]) ;
+		   try
+             Tstr.SaveToFile(FileName, TEncoding.UTF8);
+			except
+			 Result := False;
+            end;			           
+         end
+      else 
+	  begin
+	    TmpSubFile[0] := StringReplace(TmpSubFile[0], #$EF + #$BB + #$BF, '', []);
+	    tmpSubFile.SaveToFile(FileName);
+	  end;	
     except
       Result := False;
     end;

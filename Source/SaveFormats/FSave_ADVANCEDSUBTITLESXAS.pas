@@ -12,11 +12,12 @@ var
   tmpStr     : String;
   FontSize   : Cardinal;
   fc, sc, t  : Cardinal;
-  sf         : String;
+  sf         : ShortString;
   buff       : String;
   Alignment  : String;
+  I: integer;
 
-  procedure OutputDIV(f: TSubtitleFile; NeedJoin, NeedWrap: boolean; JoinShort: Byte; font, sx, sy, sw, sh: string);
+  procedure OutputDIV(f: TSubtitleFile; NeedJoin, NeedWrap: boolean; JoinShort: Byte; font, sx, sy, sw, sh: shortstring);
   var
     i : Integer;
   begin
@@ -35,23 +36,23 @@ var
         // avoid joining dialogues, they start with "-" sign
         if ((copy(tmpStr, 1, 1)<>'-') and (pos(#13#10+'-', tmpStr)=0)) then
         begin
-          buff := StringReplace(tmpStr, #13#10, ' ', [rfReplaceAll]);
+          buff := FastReplace(tmpStr, #13#10, ' ');
 
           if NeedWrap then
           begin
             tmpStr := WrapText(buff, #13#10, [' ', '.', '?', '!'], JoinShort );
-            tmpStr := StringReplace(tmpStr, ' '+#13#10, #13#10, [rfReplaceAll, rfIgnoreCase]);
+            tmpStr := FastReplace(tmpStr, ' '+#13#10, #13#10);
           end
           else
             if (length(buff)<= JoinShort) then tmpStr := buff;
         end;
       end;
 
-      tmpStr := StringReplace(tmpStr, '&', '&amp;', [rfReplaceAll, rfIgnoreCase]);
-      tmpStr := StringReplace(tmpStr, '<', '&lt', [rfReplaceAll, rfIgnoreCase]);
-      tmpStr := StringReplace(tmpStr, '>', '&gt', [rfReplaceAll, rfIgnoreCase]);
-      tmpStr := StringReplace(tmpStr, '"', '&quot;', [rfReplaceAll, rfIgnoreCase]);
-      tmpStr := StringReplace(tmpStr, '''', '&apos;', [rfReplaceAll, rfIgnoreCase]);
+      tmpStr := FastReplace(tmpStr, '&', '&amp;');
+      tmpStr := FastReplace(tmpStr, '<', '&lt');
+      tmpStr := FastReplace(tmpStr, '>', '&gt');
+      tmpStr := FastReplace(tmpStr, '"', '&quot;');
+      tmpStr := FastReplace(tmpStr, '''', '&apos;');
       tmpStr := ReplaceEnters(tmpStr,'<br />');
 
       f.Add(#09#09#09+'<p style="'+ font + '" begin="' +
@@ -66,7 +67,7 @@ var
     tmpSubFile.Add(#09#09+'</div>', False);
   end;
 
-  function PixStr(p: boolean; v: cardinal): string;
+  function PixStr(p: boolean; v: cardinal): shortstring;
   begin
     if p = TRUE then
       result := IntToStr(v)+'%'
@@ -74,12 +75,12 @@ var
       result := IntToStr(v)+'px';
   end;
 
-  procedure OutputPlane(f: TSubtitleFile; fontAttr: string; dx, dy: integer);
+  procedure OutputPlane(f: TSubtitleFile; fontAttr: shortstring; dx, dy: integer);
   const
     IntMod = 0.2;
     RealMod = 0.02;
   var
-    sx, sy, sw, sh : string;
+    sx, sy, sw, sh : shortstring;
     x, y, w, h : cardinal;
   begin
     x := XASAttributes.X;
@@ -88,12 +89,12 @@ var
     h := XASAttributes.Height;
 
     if XASAttributes.XInPercent = TRUE then
-      sx := StringReplace(FloatToStr(x+IntMod*dx)+'%', ',', '.', [rfReplaceAll, rfIgnoreCase])
+      sx := FastReplace(FloatToStr(x+IntMod*dx)+'%', ',', '.')
     else
       sx := IntToStr(round(x*(1+RealMod*dx)))+'px';
 
     if XASAttributes.YInPercent = TRUE then
-      sy := StringReplace(FloatToStr(y+IntMod*dy)+'%', ',', '.', [rfReplaceAll, rfIgnoreCase])
+      sy := FastReplace(FloatToStr(y+IntMod*dy)+'%', ',', '.')
     else
       sy := IntToStr(round(y*(1+RealMod*dy)))+'px';
 
@@ -198,7 +199,16 @@ begin
           tmpSubFile.Add('</root>', False);
 
           try
-            tmpSubFile.SaveToFile(FileName);
+             if UTF8File
+	            then begin
+           for I := 0 to TmpSubFile.Count - 1 do Tstr.add(TmpSubFile[I]);
+		   try
+             Tstr.SaveToFile(FileName, TEncoding.UTF8);
+			except
+			 Result := False;
+            end;			           
+         end
+      else tmpSubFile.SaveToFile(FileName);
           except
             Result := False;
           end;

@@ -54,7 +54,17 @@ begin
     end;
 
     try
-      tmpSubFile.SaveToFile(FileName, tlbsLF);  // Save line feed (LF) only
+      //tmpSubFile.SaveToFile(FileName, tlbsLF);  // Save line feed (LF) only
+	   if UTF8File
+	  then begin           
+           for I := 0 to TmpSubFile.Count - 1 do Tstr.add(TmpSubFile[I]);
+		   try
+             Tstr.SaveToFile(FileName, TEncoding.UTF8);
+			except
+			 Result := False;
+            end;			           
+         end
+      else tmpSubFile.SaveToFile(FileName, tlbsLF);
     except
       Result := False;
     end;

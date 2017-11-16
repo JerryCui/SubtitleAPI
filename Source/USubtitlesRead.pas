@@ -93,13 +93,15 @@ interface
 uses
   Vcl.Dialogs, // by Bedazzle 2007.01.26
   Classes, //added by adenry 2013.04.11 - for TStringList
-  USubtitleFile, USubtitlesFunctions, SysUtils{$IFDEF VIPLAY}, Forms{$ENDIF},
-  StrUtils, jclStrings;
+  USubtitleFile, USubtitlesFunctions, SysUtils, FastStrings{$IFDEF VIPLAY},
+  Forms{$ENDIF}
+  {General,} {Functions};
 
 //------------------------------------------------------------------------------
 
 type
-  TSubtitleFormats = (sfInvalid,
+  TSubtitleFormats = (
+                      sfInvalid,
                       sfAdobeEncoreDVD,
                       sfAdobeEncoreDVDNTSC,         // added by adenry 2013.04.11
                       sfAdobeEncoreDVDPAL,          // added by adenry 2013.04.11
@@ -151,6 +153,7 @@ type
                       sfSSTPlayer,
                       sfSSTScript,
                       sfSubCreator,
+
                       sfSubRip,
 //                      sfSubRipW,                   // by Bedazzle 2011.09.19
                       sfSubSonic,
@@ -166,11 +169,15 @@ type
                       sfViPlay,
                       sfWincapsTextTimecoded,      // by Bedazzle 2007.07.04
                       sfYoutube,                   // by Bedazzle 2011.09.14
-                      sfZeroG);
+                      sfZeroG
+
+                      );
 
 const
   TSubtitleFormatsName : array[1..65] of String =
-  ('Adobe Encore DVD (Old)',
+  (
+
+  'Adobe Encore DVD (Old)',
    'Adobe Encore DVD NTSC', //added by adenry 2013.04.11
    'Adobe Encore DVD PAL', //added by adenry 2013.04.11
    'Advanced SubStation Alpha',
@@ -236,7 +243,10 @@ const
    'ViPlay Subtitle File',
    'Wincaps text timecoded',  // by Bedazzle 2007.07.04
    'YouTube',                 // by Bedazzle 2011.09.14
-   'ZeroG');
+   'ZeroG'
+   );
+
+var UTF8File: longbool;
 
 //------------------------------------------------------------------------------
 
@@ -337,15 +347,120 @@ var
 
 implementation
 
-uses UCheckFormat;
+uses UCheckFormat, LibXMLParser;
 
 //------------------------------------------------------------------------------
+
+function GetFileFormat(FileName: string): byte;
+// return values: 0 = ANSI, 1 = UTF8, 2 = UTF16 LE, 3 = UTF16 BE
+var Fb: file of byte;
+    B1, B2, B3, Bx : byte;
+    Found: boolean;
+begin
+  Result := 0; // ansi file
+
+  assignfile(Fb, FileName);
+  reset(Fb);
+  read(Fb, B1, B2, B3);
+
+  Found := longbool((B1 = $EF) and (B2 = $BB) and (B3 = $BF)); // UTF8 BOM
+
+  reset(Fb);
+
+  while (not Found) and (not(Eof(Fb))) do // this code is for Detection of UTF8 without BOM
+  begin
+
+    if B1 in [$C2..$Df] then // 2 bytes
+    begin
+      if B2 in [$80..$Bf] then
+      begin
+        Found := longbool(true);
+        break;
+      end;
+    end;
+
+    if B1 = $E0 then // 3 bytes
+    begin
+      if (B2 in [$A0..$Bf]) and (B3 in [$80..$Bf]) then
+      begin
+        Found := longbool(true);
+        break;
+      end;
+    end;
+
+    if B1 in [$E1..$EF] then // 3 bytes
+    begin
+      if (B2 in [$80..$BF]) and (B3 in [$80..$BF]) then
+      begin
+        Found := longbool(true);
+        break;
+      end;
+    end;
+
+    if B1 in [$f0..$f4] then // 4 bytes, the last one is not checked here
+    begin
+      if (B2 in [$80..$BF]) and (B3 in [$80..$BF]) then
+      begin
+        Found := longbool(true);
+        break;
+      end;
+    end;
+
+    read(Fb, Bx); // read next byte
+    B1 := B2;
+    B2 := B3;
+    B3 := Bx; // shift already read bytes
+  end;
+
+  if Found then
+  begin
+    closefile(Fb);
+    Result := 1; // UTF8
+    exit;
+  end;
+
+  // test for UTF16 LE
+
+  Reset(Fb);
+  Found := false;
+  Read(Fb, B1, B2);
+  Found := (B1 = $FF) and (B2 = $FE);
+
+  if Found then
+  begin
+    closefile(Fb);
+    Result := 2; // UCS-2 LE
+    exit;
+  end;
+
+  // test for UTF16 BE
+
+  Reset(Fb);
+  Found := false;
+  Read(Fb, B1, B2);
+  Found := (B1 = $FE) and (B2 = $FF);
+
+  if Found then
+  begin
+    closefile(Fb);
+    Result := 3; // UCS-2 BE
+    exit;
+  end;
+
+  Closefile(Fb);
+end;
 
 function LoadSubtitle(var Subtitles: TSubtitles; const FileName: String; FPS: Single; SubtitleFormat: TSubtitleFormats = sfInvalid; Clear: Boolean = True; ReCalcTimeValues: Boolean = False): Boolean;
 var
   tmpSubFile: TSubtitleFile;
+  I: integer;
+  Fmt: byte;
+  TStr: TStrings;
 begin
   Result := False;
+
+  Fmt := GetFileFormat(FileName); // Kameleon
+  UTF8File := Fmt > 0;            // Kameleon
 
   if Clear = True then CloseSubtitle(Subtitles);
   if Assigned(Subtitles) = False then Subtitles := TSubtitles.Create;
@@ -353,11 +468,24 @@ begin
 
   tmpSubFile := TSubtitleFile.Create;
   try
-    tmpSubFile.LoadFromFile(FileName);
+    // begin Kameleon
+    TStr := TStringList.Create;
+
+    if Fmt = 1 // utf8, can be without BOM, in which case LoadFromFile will not see that
+    then TStr.LoadFromFile(FileName, TEncoding.UTF8) // force format
+    else Tstr.LoadFromFile(FileName);                // auto format (BOM based)
+
+    TmpSubFile.Clear;
+    For I := 0 to Tstr.Count - 1 do TmpSubFile.Add(Tstr[I], true);
+
+    TStr.Free;
+    // end Kameleon
+
     if Subtitles.Format <= Integer(sfInvalid) then
       Subtitles.Format := Integer(CheckSubtitleFormat(tmpSubFile));
 
     Result := FileToSubtitles(Subtitles, tmpSubFile, FPS, TSubtitleFormats(Subtitles.Format), ReCalcTimeValues);
+
   finally
     tmpSubFile.Free;
     if Result = False then
@@ -416,6 +544,7 @@ function FileToSubtitles(var Subtitles: TSubtitles; tmpSubFile: TSubtitleFile; F
 var
   ExtraTime: Integer;
 begin
+
   Result := False;
 
   if (ReCalcTimeValues = True) and Assigned(Subtitles) and (Subtitles.Count > 0) then
@@ -492,6 +621,7 @@ begin
     sfYoutube                 : Result := FileToSubtitles_YOUTUBE                (Subtitles, tmpSubFile, ExtraTime);    // by Bedazzle 2011.09.14
     sfZeroG                   : Result := FileToSubtitles_ZEROG                  (Subtitles, tmpSubFile, ExtraTime);
   end;
+
 end;
 
 //------------------------------------------------------------------------------
@@ -561,7 +691,6 @@ end;
 {$include ReadFormats/FRead_WINCAPSTEXTTIMECODED}
 {$include ReadFormats/FRead_YOUTUBE}
 {$include ReadFormats/FRead_ZEROG}
-
 //------------------------------------------------------------------------------
 
 function IndexToName(const FormatIndex: ShortInt): String;

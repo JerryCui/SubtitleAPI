@@ -49,7 +49,7 @@ function SubtitlesToFile_SUBSTATIONALPHA(Subtitles: TSubtitles; const FileName: 
 	    //1.2. </c> COLOR CLOSE TAGS: in SSA the equivalent to a color close tag is to set the primary color
 
 	    //1.2.1. Remove closing tags for color at the end of the subtitle
-	    tagPos := StrIPos('</c>', Text);
+	    tagPos := SmartPos('</c>', Text, False);
 	    while tagPos > 0 do
 	    begin
 	      if RemoveSWTags(Copy(Text, tagPos, MaxInt), False, False, False, True) = '' then
@@ -57,27 +57,25 @@ function SubtitlesToFile_SUBSTATIONALPHA(Subtitles: TSubtitles; const FileName: 
 	        Text := Copy(Text, 1, tagPos-1);
 	        break;
 	      end else
-	        tagPos := StrFind('</c>', Text, tagPos+1);
+	        tagPos := SmartPos('</c>', Text, False, tagPos+1);
 	    end;
         //1.2.2. Set close tag (ssa default color)
 	    Text := ReplaceString(Text, '</c>', SSAColor);
 
 	    //1.3. <c:# COLOR OPEN TAGS:
 
-	    tagPos := StrIPos('<c:#', Text);
+	    tagPos := SmartPos('<c:#', Text, False);
 	    while tagPos > 0 do
 	    begin
 	      additional := 0;
 	      SSAColor := Copy(Text, tagPos+4, 6); //get color value
-	      if CharIsHexDigit(SSAColor[1]) and CharIsHexDigit(SSAColor[2]) and
-           CharIsHexDigit(SSAColor[3]) and CharIsHexDigit(SSAColor[4]) and
-           CharIsHexDigit(SSAColor[5]) and CharIsHexDigit(SSAColor[6]) then
+	      if (SSAColor[1] in HexChars) and (SSAColor[2] in HexChars) and (SSAColor[3] in HexChars) and (SSAColor[4] in HexChars) and (SSAColor[5] in HexChars) and (SSAColor[6] in HexChars) then
 	      begin
 	        SSAColor := '{\c&H' + SSAColor[5] + SSAColor[6] + SSAColor[3] + SSAColor[4] + SSAColor[1] + SSAColor[2] + '&}';
 	        Insert(SSAColor, Text, tagPos);
 	        additional := 13;
 	      end;
-	      tagPos := StrFind('<c:#', Text, tagPos+4+additional);
+	      tagPos := SmartPos('<c:#', Text, False, tagPos+4+additional);
 	    end;
 	    Text := RemoveSWTags(Text, False, False, False, True);
 	
@@ -201,7 +199,16 @@ begin
     end;
 
     try
-      tmpSubFile.SaveToFile(FileName);
+       if UTF8File
+	  then begin           
+           for I := 0 to TmpSubFile.Count - 1 do Tstr.add(TmpSubFile[I]);
+		   try
+             Tstr.SaveToFile(FileName, TEncoding.UTF8);
+			except
+			 Result := False;
+            end;			           
+         end
+      else tmpSubFile.SaveToFile(FileName);
     except
       Result := False;
     end;

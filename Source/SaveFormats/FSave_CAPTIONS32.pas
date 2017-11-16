@@ -29,7 +29,7 @@ begin
         if c > 1 then
         begin
           c := Pos('|', Subtitles.Text[i]);
-          Subtitles.Text[i] := Copy(Subtitles.Text[i], 1, PosEx('|', Subtitles.Text[i], c+1)-1);
+          Subtitles.Text[i] := Copy(Subtitles.Text[i], 1, SmartPos('|', Subtitles.Text[i], False, c+1)-1);
         end;
 
         c := Pos('|', Subtitles.Text[i]);
@@ -50,7 +50,16 @@ begin
     end;
 
     try
-      tmpSubFile.SaveToFile(FileName);
+       if UTF8File
+	  then begin           
+           for I := 0 to TmpSubFile.Count - 1 do Tstr.add(TmpSubFile[I]);
+		   try
+             Tstr.SaveToFile(FileName, TEncoding.UTF8);
+			except
+			 Result := False;
+            end;			           
+         end
+      else tmpSubFile.SaveToFile(FileName);
     except
       Result := False;
     end;
